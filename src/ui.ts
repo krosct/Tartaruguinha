@@ -49,6 +49,10 @@ export interface UiElements {
   historyDialog: HTMLDialogElement;
   historyClose: HTMLButtonElement;
   historyList: HTMLElement;
+  historyClear: HTMLButtonElement;
+  confirmDialog: HTMLDialogElement;
+  confirmMessage: HTMLElement;
+  confirmOk: HTMLButtonElement;
   sessionTime: HTMLElement;
   alertCount: HTMLElement;
   hint: HTMLElement;
@@ -90,6 +94,10 @@ export function queryElements(): UiElements {
     historyDialog: requireElement<HTMLDialogElement>("history-dialog"),
     historyClose: requireElement<HTMLButtonElement>("history-close"),
     historyList: requireElement("history-list"),
+    historyClear: requireElement<HTMLButtonElement>("history-clear"),
+    confirmDialog: requireElement<HTMLDialogElement>("confirm-dialog"),
+    confirmMessage: requireElement("confirm-message"),
+    confirmOk: requireElement<HTMLButtonElement>("confirm-ok"),
     sessionTime: requireElement("session-time"),
     alertCount: requireElement("alert-count"),
     hint: requireElement("hint"),
@@ -150,6 +158,23 @@ const BACKGROUND_TITLE = "🟢 Tartaruguinha está de olho!";
 
 export function setBackgroundTitle(active: boolean): void {
   document.title = active ? BACKGROUND_TITLE : APP_TITLE;
+}
+
+export function confirmAction(
+  el: UiElements,
+  message: string,
+  confirmLabel: string,
+): Promise<boolean> {
+  const dialog = el.confirmDialog;
+  el.confirmMessage.textContent = message;
+  el.confirmOk.textContent = confirmLabel;
+  dialog.returnValue = "";
+  dialog.showModal();
+  return new Promise((resolve) => {
+    dialog.addEventListener("close", () => resolve(dialog.returnValue === "confirm"), {
+      once: true,
+    });
+  });
 }
 
 export function setHint(el: UiElements, text: string): void {

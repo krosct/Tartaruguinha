@@ -144,6 +144,21 @@
           navegador.
         </p>
         <div id="history-list"></div>
+        <div class="history-actions">
+          <button type="button" id="history-clear" class="secondary danger-text">
+            Limpar histórico
+          </button>
+        </div>
+      </dialog>
+
+      <dialog id="confirm-dialog" class="confirm-dialog" aria-labelledby="confirm-message">
+        <form method="dialog">
+          <p id="confirm-message" class="confirm-message"></p>
+          <div class="confirm-actions">
+            <button value="cancel" class="secondary">Cancelar</button>
+            <button value="confirm" id="confirm-ok" class="danger">Apagar</button>
+          </div>
+        </form>
       </dialog>
     </main>
     <script type="module" src="/src/main.ts"></script>

@@ -41,6 +41,10 @@ export function upsertRecord(history: SessionRecord[], record: SessionRecord): S
   return [...rest, { ...record }].sort((a, b) => a.startedAt - b.startedAt);
 }
 
+export function dropRecord(history: SessionRecord[], id: string): SessionRecord[] {
+  return history.filter((item) => item.id !== id);
+}
+
 export function postureShare(record: SessionRecord): { good: number; hunched: number } | null {
   const classified = record.goodMs + record.hunchedMs;
   if (classified <= 0) {
@@ -69,13 +73,24 @@ export function loadHistory(): SessionRecord[] {
   }
 }
 
-export function saveRecord(record: SessionRecord): void {
+function writeHistory(history: SessionRecord[]): void {
   try {
-    const next = upsertRecord(loadHistory(), record);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
   } catch {
     // Storage may be blocked; the live session keeps working.
   }
+}
+
+export function saveRecord(record: SessionRecord): void {
+  writeHistory(upsertRecord(loadHistory(), record));
+}
+
+export function removeRecord(id: string): void {
+  writeHistory(dropRecord(loadHistory(), id));
+}
+
+export function clearHistory(keepId: string | null): void {
+  writeHistory(loadHistory().filter((item) => item.id === keepId));
 }
 
 export function newSessionId(): string {

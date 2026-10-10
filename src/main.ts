@@ -1,7 +1,14 @@
 import { CameraError, startCamera, stopCamera } from "./camera";
 import { clearOverlay, drawSkeleton, resizeOverlay } from "./overlay";
-import { loadHistory, newSessionId, saveRecord, SessionRecord } from "./history";
-import { renderHistory } from "./historyPanel";
+import {
+  clearHistory,
+  loadHistory,
+  newSessionId,
+  removeRecord,
+  saveRecord,
+  SessionRecord,
+} from "./history";
+import { formatSessionStart, renderHistory } from "./historyPanel";
 import { FloatingStage, pipSupported } from "./pip";
 import { PoseDetector, PoseFrame } from "./pose";
 import {
@@ -99,9 +106,20 @@ function init(): void {
   el.video.disablePictureInPicture = true;
 
   el.historyOpen.addEventListener("click", () => {
-    persistSession();
-    renderHistory(el.historyList, loadHistory(), current?.id ?? null);
+    showHistory();
     el.historyDialog.showModal();
+  });
+
+  el.historyClear.addEventListener("click", () => {
+    const message = current
+      ? "Apagar todas as sessões anteriores? A sessão atual é mantida."
+      : "Apagar todas as sessões do histórico?";
+    void ui.confirmAction(el, message, "Limpar histórico").then((confirmed) => {
+      if (confirmed) {
+        clearHistory(current?.id ?? null);
+        showHistory();
+      }
+    });
   });
 
   el.historyClose.addEventListener("click", () => el.historyDialog.close());
@@ -125,6 +143,24 @@ function init(): void {
     current: settings,
     defaults,
     onChange: applySettings,
+  });
+}
+
+function showHistory(): void {
+  persistSession();
+  const history = loadHistory();
+  const currentId = current?.id ?? null;
+  renderHistory(el.historyList, history, currentId, deleteSession);
+  el.historyClear.disabled = !history.some((record) => record.id !== currentId);
+}
+
+function deleteSession(record: SessionRecord): void {
+  const message = `Apagar a sessão de ${formatSessionStart(record)}?`;
+  void ui.confirmAction(el, message, "Apagar").then((confirmed) => {
+    if (confirmed) {
+      removeRecord(record.id);
+      showHistory();
+    }
   });
 }
 

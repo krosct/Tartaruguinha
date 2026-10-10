@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   alertTrend,
+  dropRecord,
   parseHistory,
   postureShare,
   SessionRecord,
@@ -42,6 +43,20 @@ describe("alertTrend", () => {
   it("handles a previous session without alerts", () => {
     expect(alertTrend(record(), record())).toEqual({ kind: "change", percent: 0 });
     expect(alertTrend(record(), record({ alerts: 2 }))).toEqual({ kind: "new_alerts" });
+  });
+});
+
+describe("dropRecord", () => {
+  it("recomputes the next session's trend against the one before the removed entry", () => {
+    const history = [
+      record({ id: "a", startedAt: 1, alerts: 4 }),
+      record({ id: "b", startedAt: 2, alerts: 7 }),
+      record({ id: "c", startedAt: 3, alerts: 0 }),
+    ];
+    const next = dropRecord(history, "b");
+    expect(next.map((item) => item.id)).toEqual(["a", "c"]);
+    expect(alertTrend(next[0], next[1])).toEqual({ kind: "change", percent: 100 });
+    expect(alertTrend(undefined, dropRecord(history, "a")[0])).toEqual({ kind: "first" });
   });
 });
 
