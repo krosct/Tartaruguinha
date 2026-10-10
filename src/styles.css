@@ -48,6 +48,21 @@ body {
   padding: 24px 16px 48px;
 }
 
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: -16px;
+}
+
+.avatar {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  -webkit-mask-image: radial-gradient(circle closest-side, #000 55%, transparent 100%);
+  mask-image: radial-gradient(circle closest-side, #000 55%, transparent 100%);
+}
+
 .head h1 {
   margin: 0;
   font-size: 1.9rem;
