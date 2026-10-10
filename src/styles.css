@@ -461,14 +461,29 @@ button:disabled {
 }
 
 .history-dialog {
-  scrollbar-color: #2c3b5c var(--panel);
   width: min(560px, calc(100vw - 32px));
   max-height: calc(100dvh - 48px);
   padding: 20px;
+  overflow: hidden;
   border: 1px solid #24314d;
   border-radius: var(--radius);
   background: var(--panel);
   color: var(--text);
+}
+
+.history-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+#history-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin-right: -12px;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #2c3b5c transparent;
 }
 
 .history-dialog::backdrop {
