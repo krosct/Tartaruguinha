@@ -161,7 +161,6 @@ button:disabled {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scaleX(-1);
   display: block;
 }
 
@@ -171,7 +170,6 @@ button:disabled {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scaleX(-1);
   pointer-events: none;
 }
 
@@ -584,11 +582,6 @@ button:disabled {
   border-radius: 0;
 }
 
-.pip-body #preview,
-.pip-body .pose-overlay {
-  transform: none;
-}
-
 .pip-body .hud {
   padding: 6px;
 }
@@ -604,13 +597,15 @@ button:disabled {
   height: 40px;
   border-radius: 50%;
   background: rgba(15, 23, 42, 0.85);
-  border: 1px solid #334155;
+  border: 1px solid rgba(20, 184, 166, 0.9);
+  box-shadow: 0 0 0 1px rgba(20, 184, 166, 0.5);
   font-size: 28px;
   line-height: 1;
 }
 
 .pip-badge span {
   display: inline-block;
+  filter: drop-shadow(0 0 4px rgba(230, 236, 245, 0.8));
   animation: turtle-spin 30s linear infinite;
 }
 
