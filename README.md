@@ -80,7 +80,7 @@ Depois de um aviso, ela espera um pouco antes de avisar de novo. Um piscar de ol
 Mais rigorosa ou mais tolerante? Som mais alto, mais baixo ou desligado? Avisos mais ou menos frequentes? Tudo se ajusta em segundos no painel de configurações, e ela lembra das suas preferências.
 
 ### 🪟 Continua de olho enquanto você trabalha
-Você não precisar ficar sempre de olho na Tartaruguinha, ela que vai ficar olhando para você! Pode trocar de aba ou abrir outro programa e ela vai continuar te avisando quando você se curvar! Você também pode pedir para ela fazer uma pausa quando você não estiver com a aba dela em foco; pode pedir para ela continuar o trabalho em segundo plano ou em uma janelinha que você pode se ver.
+Você não precisa ficar sempre de olho na Tartaruguinha, ela que vai ficar olhando para você! Pode trocar de aba ou abrir outro programa e ela vai continuar te avisando quando você se curvar! Você também pode pedir para ela fazer uma pausa quando você não estiver com a aba dela em foco; pode pedir para ela continuar o trabalho em segundo plano ou em uma janelinha que você pode se ver.
 
 ### 📱 No computador e no celular
 Funciona no navegador do computador e no Android, e pode ser instalada como um app com ícone na tela inicial.
