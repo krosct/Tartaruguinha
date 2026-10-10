@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="img/tartaruguinha.jpg" alt="Tartaruguinha fazendo joinha na frente do computador" width="360" />
+<img src="img/tartaruguinha.jpg" alt="Tartaruguinha fazendo joinha na frente do computador" width="450" />
 
 # Tartaruguinha 🐢
 
@@ -22,8 +22,8 @@ Ninguém percebe isso sozinho. Quando o pescoço reclama, o estrago do dia já e
 
 <table>
   <tr>
-    <th align="center">😩 Antes</th>
-    <th align="center">😎 Depois</th>
+    <th align="center">😩 Antes 🚫</th>
+    <th align="center">😎 Depois ✅</th>
   </tr>
   <tr>
     <td><img src="img/antes.jpg" alt="Tartaruga com o pescoço esticado em direção ao monitor" width="400" /></td>
@@ -79,11 +79,17 @@ Depois de um aviso, ela espera um pouco antes de avisar de novo. Um piscar de ol
 ### 🎛️ Do seu jeito
 Mais rigorosa ou mais tolerante? Som mais alto, mais baixo ou desligado? Avisos mais ou menos frequentes? Tudo se ajusta em segundos no painel de configurações, e ela lembra das suas preferências.
 
+### 🪟 Continua de olho enquanto você trabalha
+Você não precisar ficar sempre de olho na Tartaruguinha, ela que vai ficar olhando para você! Pode trocar de aba ou abrir outro programa e ela vai continuar te avisando quando você se curvar! Você também pode pedir para ela fazer uma pausa quando você não estiver com a aba dela em foco; pode pedir para ela continuar o trabalho em segundo plano ou em uma janelinha que você pode se ver.
+
 ### 📱 No computador e no celular
 Funciona no navegador do computador e no Android, e pode ser instalada como um app com ícone na tela inicial.
 
 ### ⏱️ Acompanhe sua sessão
-Um cronômetro mostra há quanto tempo você está trabalhando e um contador mostra quantas vezes ela precisou te chamar. Ver esse número cair dia após dia é muito satisfatório.
+Um cronômetro mostra há quanto tempo você está trabalhando e um contador mostra quantas vezes ela precisou te chamar. Precisa de uma pausa? Você pode **Pausar** e depois **Retomar** quando quiser e continuará na mesma sessão ou então **Reiniciar** começando uma nova.
+
+### 📈 Veja sua evolução
+O histórico guarda cada sessão com data, hora, alertas e quanto tempo você passou com boa postura e curvado. Cada sessão mostra quanto você melhorou (em verde) ou piorou (em vermelho). Ver esse número cair dia após dia é muito satisfatório.
 
 ---
 
@@ -91,9 +97,9 @@ Um cronômetro mostra há quanto tempo você está trabalhando e um contador mos
 
 - ✅ A câmera só liga quando você clica em **Iniciar**.
 - ✅ Um indicador sempre mostra se o monitoramento está ligado.
-- ✅ O botão **Parar** desliga tudo na hora.
-- ✅ Trocou de aba? Ela pausa sozinha.
-- ✅ Nada de reconhecimento facial, contas ou histórico na nuvem.
+- ✅ O botão **Pausar** desliga a câmera na hora.
+- ✅ Trocou de aba? O título da aba avisa que ela continua de olho. Se preferir, ela pausa sozinha.
+- ✅ O histórico fica só no seu navegador. Nada de reconhecimento facial, contas ou dados na nuvem.
 
 ---
 

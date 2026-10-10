@@ -19,6 +19,7 @@ describe("envDefaults", () => {
     expect(settings.poseDelegate).toBe("GPU");
     expect(settings.showGuide).toBe(true);
     expect(settings.showSkeleton).toBe(true);
+    expect(settings.backgroundMode).toBe("worker");
   });
 
   it("reads every parameter from its env variable", () => {
@@ -35,6 +36,7 @@ describe("envDefaults", () => {
       VITE_ALERT_SOUND: "off",
       VITE_ALERT_VOLUME: "0.2",
       VITE_NOTIFICATION_COOLDOWN_MS: "300000",
+      VITE_BACKGROUND_MODE: "pip",
       VITE_POSE_MODEL: "heavy",
       VITE_POSE_DELEGATE: "CPU",
       VITE_MIN_POSE_DETECTION_CONFIDENCE: "0.4",
@@ -54,6 +56,7 @@ describe("envDefaults", () => {
       alertSound: "off",
       alertVolume: 0.2,
       notificationCooldownMs: 300000,
+      backgroundMode: "pip",
       poseModel: "heavy",
       poseDelegate: "CPU",
       minPoseDetectionConfidence: 0.4,

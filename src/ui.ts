@@ -23,6 +23,14 @@ export const HUD_TEXT: Record<PostureResult, string> = {
 
 export type MonitoringState = "on" | "off" | "paused";
 
+export type ToggleState = "idle" | "running" | "paused";
+
+const TOGGLE_TEXT: Record<ToggleState, string> = {
+  idle: "Iniciar",
+  running: "Pausar",
+  paused: "Retomar",
+};
+
 export interface UiElements {
   consent: HTMLElement;
   consentCheck: HTMLInputElement;
@@ -32,6 +40,19 @@ export interface UiElements {
   status: HTMLElement;
   statusDetail: HTMLElement;
   toggle: HTMLButtonElement;
+  restart: HTMLButtonElement;
+  historyOpen: HTMLButtonElement;
+  pipOpen: HTMLButtonElement;
+  pipFooter: HTMLElement;
+  pipTime: HTMLElement;
+  pipAlerts: HTMLElement;
+  historyDialog: HTMLDialogElement;
+  historyClose: HTMLButtonElement;
+  historyList: HTMLElement;
+  historyClear: HTMLButtonElement;
+  confirmDialog: HTMLDialogElement;
+  confirmMessage: HTMLElement;
+  confirmOk: HTMLButtonElement;
   sessionTime: HTMLElement;
   alertCount: HTMLElement;
   hint: HTMLElement;
@@ -64,6 +85,19 @@ export function queryElements(): UiElements {
     status: requireElement("status"),
     statusDetail: requireElement("status-detail"),
     toggle: requireElement<HTMLButtonElement>("toggle"),
+    restart: requireElement<HTMLButtonElement>("restart"),
+    historyOpen: requireElement<HTMLButtonElement>("history-open"),
+    pipOpen: requireElement<HTMLButtonElement>("pip-open"),
+    pipFooter: requireElement("pip-footer"),
+    pipTime: requireElement("pip-time"),
+    pipAlerts: requireElement("pip-alerts"),
+    historyDialog: requireElement<HTMLDialogElement>("history-dialog"),
+    historyClose: requireElement<HTMLButtonElement>("history-close"),
+    historyList: requireElement("history-list"),
+    historyClear: requireElement<HTMLButtonElement>("history-clear"),
+    confirmDialog: requireElement<HTMLDialogElement>("confirm-dialog"),
+    confirmMessage: requireElement("confirm-message"),
+    confirmOk: requireElement<HTMLButtonElement>("confirm-ok"),
     sessionTime: requireElement("session-time"),
     alertCount: requireElement("alert-count"),
     hint: requireElement("hint"),
@@ -113,9 +147,34 @@ export function setMonitoringState(el: UiElements, state: MonitoringState): void
   el.hud.dataset.monitoring = state;
 }
 
-export function setToggle(el: UiElements, monitoring: boolean): void {
-  el.toggle.textContent = monitoring ? "Parar" : "Iniciar";
-  el.toggle.dataset.monitoring = String(monitoring);
+export function setToggle(el: UiElements, state: ToggleState, hasSession: boolean): void {
+  el.toggle.textContent = TOGGLE_TEXT[state];
+  el.toggle.dataset.state = state;
+  el.restart.disabled = !hasSession;
+}
+
+const APP_TITLE = "Tartaruguinha";
+const BACKGROUND_TITLE = "🟢 Tartaruguinha está de olho!";
+
+export function setBackgroundTitle(active: boolean): void {
+  document.title = active ? BACKGROUND_TITLE : APP_TITLE;
+}
+
+export function confirmAction(
+  el: UiElements,
+  message: string,
+  confirmLabel: string,
+): Promise<boolean> {
+  const dialog = el.confirmDialog;
+  el.confirmMessage.textContent = message;
+  el.confirmOk.textContent = confirmLabel;
+  dialog.returnValue = "";
+  dialog.showModal();
+  return new Promise((resolve) => {
+    dialog.addEventListener("close", () => resolve(dialog.returnValue === "confirm"), {
+      once: true,
+    });
+  });
 }
 
 export function setHint(el: UiElements, text: string): void {
@@ -124,10 +183,12 @@ export function setHint(el: UiElements, text: string): void {
 
 export function setSessionTime(el: UiElements, elapsedMs: number): void {
   el.sessionTime.textContent = formatDuration(elapsedMs);
+  el.pipTime.textContent = el.sessionTime.textContent;
 }
 
 export function setAlertCount(el: UiElements, count: number): void {
   el.alertCount.textContent = String(count);
+  el.pipAlerts.textContent = `${count} ${count === 1 ? "alerta" : "alertas"}`;
 }
 
 export function formatDuration(ms: number): string {

@@ -9,14 +9,18 @@
       content="Sua webcam observa a postura e avisa, na hora, quando você se curva."
     />
     <title>Tartaruguinha</title>
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
     <main id="app">
       <header class="head">
-        <h1>Tartaruguinha</h1>
+        <div class="brand">
+          <img class="avatar" src="/img/perfil.webp" alt="" width="120" height="120" />
+          <h1>Tartaruguinha</h1>
+        </div>
         <p class="tagline">
-          Sua postura agradece. Seu pescoço também.
+          <b>Sua postura agradece.</b> Seu pescoço também.
         </p>
       </header>
 
@@ -26,7 +30,7 @@
           <li>A análise de postura roda inteiramente no seu aparelho, em tempo real.</li>
           <li>Nenhuma imagem ou vídeo sai do aparelho, nem é gravado.</li>
           <li>Um indicador mostra sempre quando o monitoramento está ligado.</li>
-          <li>O botão <b>Parar</b> encerra tudo na hora.</li>
+          <li>O botão <b>Pausar</b> desliga a câmera na hora.</li>
         </ul>
         <label class="check">
           <input type="checkbox" id="consent-check" />
@@ -41,6 +45,7 @@
         <div id="stage" class="stage">
           <video id="preview" playsinline muted></video>
           <canvas id="pose-overlay" class="pose-overlay"></canvas>
+          <div class="pip-badge" aria-hidden="true"><span>🐢</span></div>
           <div id="guide" class="guide" data-result="unknown" aria-hidden="true"></div>
           <div id="hud" class="hud" data-result="unknown" data-monitoring="off">
             <span class="hud-dot"></span>
@@ -48,12 +53,55 @@
           </div>
         </div>
 
+        <div id="pip-footer" class="pip-footer" aria-hidden="true">
+          <span id="pip-time">00:00</span>
+          <span id="pip-alerts">0 alertas</span>
+        </div>
+
         <p id="status" class="status" data-result="unknown">Pronto para começar</p>
         <p id="status-detail" class="status-detail"></p>
         <p id="reason" class="reason" data-visible="false"></p>
 
         <div class="controls">
-          <button id="toggle" class="primary" data-monitoring="false">Iniciar</button>
+          <button id="toggle" class="primary" data-state="idle">Iniciar</button>
+          <button
+            id="restart"
+            class="secondary icon-button"
+            type="button"
+            aria-label="Reiniciar (nova sessão)"
+            title="Reiniciar (nova sessão)"
+            disabled
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+              <path d="M21 3v5h-5" />
+            </svg>
+          </button>
+          <button
+            id="pip-open"
+            class="secondary icon-button hidden"
+            type="button"
+            aria-label="Abrir janela flutuante"
+            title="Abrir janela flutuante"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 9V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4" />
+              <rect x="12" y="13" width="10" height="7" rx="2" />
+            </svg>
+          </button>
+          <button
+            id="history-open"
+            class="secondary icon-button"
+            type="button"
+            aria-label="Histórico de sessões"
+            title="Histórico de sessões"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+              <path d="M12 7v5l4 2" />
+            </svg>
+          </button>
         </div>
 
         <div class="session">
@@ -79,6 +127,43 @@
         </details>
       </section>
 
+      <dialog id="history-dialog" class="history-dialog" aria-labelledby="history-title">
+        <div class="history-top">
+          <h2 id="history-title">Sessões anteriores</h2>
+          <button
+            type="button"
+            id="history-close"
+            class="secondary icon-button"
+            aria-label="Fechar"
+            title="Fechar"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <line x1="6" y1="6" x2="18" y2="18" />
+              <line x1="18" y1="6" x2="6" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <p class="history-note">
+          A melhora compara a quantidade de alertas com a sessão anterior. Fica salvo só neste
+          navegador.
+        </p>
+        <div id="history-list"></div>
+        <div class="history-actions">
+          <button type="button" id="history-clear" class="secondary danger-text">
+            Limpar histórico
+          </button>
+        </div>
+      </dialog>
+
+      <dialog id="confirm-dialog" class="confirm-dialog" aria-labelledby="confirm-message">
+        <form method="dialog">
+          <p id="confirm-message" class="confirm-message"></p>
+          <div class="confirm-actions">
+            <button value="cancel" class="secondary">Cancelar</button>
+            <button value="confirm" id="confirm-ok" class="danger">Apagar</button>
+          </div>
+        </form>
+      </dialog>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>

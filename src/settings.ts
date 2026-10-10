@@ -1,6 +1,7 @@
 export type PoseModel = "lite" | "full" | "heavy";
 export type PoseDelegate = "GPU" | "CPU";
 export type AlertSound = "on" | "off";
+export type BackgroundMode = "off" | "worker" | "pip";
 
 export interface Settings {
   showGuide: boolean;
@@ -15,6 +16,7 @@ export interface Settings {
   alertSound: AlertSound;
   alertVolume: number;
   notificationCooldownMs: number;
+  backgroundMode: BackgroundMode;
   poseModel: PoseModel;
   poseDelegate: PoseDelegate;
   minPoseDetectionConfidence: number;
@@ -24,7 +26,7 @@ export interface Settings {
 
 export type SettingKey = keyof Settings;
 
-export type FieldGroup = "display" | "rule" | "timing" | "alert" | "detector";
+export type FieldGroup = "display" | "rule" | "timing" | "alert" | "background" | "detector";
 
 interface BaseField {
   key: SettingKey;
@@ -63,6 +65,7 @@ export const GROUP_TITLES: Record<FieldGroup, string> = {
   rule: "Regra de postura",
   timing: "Tempo e estabilidade",
   alert: "Alerta",
+  background: "Segundo plano",
   detector: "Detector (MediaPipe)",
 };
 
@@ -210,6 +213,20 @@ export const FIELDS: Field[] = [
     max: 3600000,
     step: 1000,
     integer: true,
+  },
+  {
+    key: "backgroundMode",
+    env: "VITE_BACKGROUND_MODE",
+    group: "background",
+    kind: "select",
+    label: "Quando a aba ficar oculta",
+    help: "Continuar segue analisando com a aba oculta e avisa por som e notificação. A janela flutuante mantém a câmera visível por cima das outras janelas (Chrome/Edge no computador).",
+    fallback: "worker",
+    options: [
+      { value: "off", label: "Pausar" },
+      { value: "worker", label: "Continuar em segundo plano" },
+      { value: "pip", label: "Janela flutuante" },
+    ],
   },
   {
     key: "poseModel",

@@ -1,4 +1,5 @@
 :root {
+  color-scheme: dark;
   --bg: #0b1220;
   --panel: #131c2e;
   --panel-2: #1b2740;
@@ -24,6 +25,10 @@ body {
   min-height: 100%;
 }
 
+html {
+  scrollbar-color: #2c3b5c var(--bg);
+}
+
 body {
   background: radial-gradient(1200px 600px at 50% -10%, #17233b 0%, var(--bg) 60%);
   color: var(--text);
@@ -41,6 +46,21 @@ body {
   max-width: 640px;
   margin: 0 auto;
   padding: 24px 16px 48px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: -16px;
+}
+
+.avatar {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  -webkit-mask-image: radial-gradient(circle closest-side, #000 55%, transparent 100%);
+  mask-image: radial-gradient(circle closest-side, #000 55%, transparent 100%);
 }
 
 .head h1 {
@@ -118,9 +138,28 @@ button:disabled {
   font-size: 1.05rem;
 }
 
-.primary[data-monitoring="true"] {
+.primary[data-state="running"] {
   background: var(--danger);
   color: #2a0707;
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  padding: 0;
+}
+
+.icon-button svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .secondary {
@@ -421,6 +460,289 @@ button:disabled {
   }
 }
 
+.history-dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  padding: 20px;
+  overflow: hidden;
+  border: 1px solid #24314d;
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.history-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+#history-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin-right: -12px;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #2c3b5c transparent;
+}
+
+.history-dialog::backdrop {
+  background: rgba(5, 8, 15, 0.7);
+}
+
+.history-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.history-top h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.history-top .icon-button {
+  width: 40px;
+  height: 40px;
+}
+
+.history-note,
+.history-empty {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.history-item {
+  position: relative;
+  background: var(--panel-2);
+  border: 1px solid #2c3b5c;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.history-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  margin-bottom: 10px;
+  padding-right: 32px;
+}
+
+.history-delete {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.history-delete:hover,
+.history-delete:focus-visible {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
+}
+
+.history-delete svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.history-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.danger-text {
+  color: var(--danger);
+}
+
+.danger {
+  background: var(--danger);
+  color: #2a0707;
+  font-weight: 700;
+}
+
+.confirm-dialog {
+  width: min(380px, calc(100vw - 32px));
+  padding: 20px;
+  border: 1px solid #24314d;
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.confirm-dialog::backdrop {
+  background: rgba(5, 8, 15, 0.7);
+}
+
+.confirm-message {
+  margin: 0 0 20px;
+  font-weight: 600;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.history-when {
+  font-weight: 700;
+}
+
+.history-current {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--accent-strong);
+  font-size: 0.72rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.trend {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.trend[data-trend="better"] {
+  color: var(--good);
+}
+
+.trend[data-trend="worse"] {
+  color: var(--hunched);
+}
+
+.trend[data-trend="neutral"] {
+  color: var(--muted);
+}
+
+.history-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 8px;
+}
+
+.history-stat {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.history-stat b {
+  color: var(--text);
+  font-size: 0.98rem;
+}
+
+.history-stat[data-tone="good"] b {
+  color: var(--good);
+}
+
+.history-stat[data-tone="hunched"] b {
+  color: var(--hunched);
+}
+
 .hidden {
   display: none !important;
+}
+
+.pip-footer,
+.pip-badge {
+  display: none;
+}
+
+.pip-body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  background: #05080f;
+}
+
+.pip-body .stage {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+}
+
+.pip-body .hud {
+  padding: 6px;
+}
+
+.pip-body .pip-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(20, 184, 166, 0.9);
+  box-shadow: 0 0 0 1px rgba(20, 184, 166, 0.5);
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* The emoji glyph sits slightly low in its box; lift it and spin around its center. */
+.pip-badge span {
+  display: block;
+  margin-top: -0.09em;
+  transform-origin: 50% calc(50% + 0.09em);
+  filter: drop-shadow(0 0 4px rgba(230, 236, 245, 0.8));
+  animation: turtle-spin 30s linear infinite;
+}
+
+@keyframes turtle-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pip-badge span {
+    animation: none;
+  }
+}
+
+.pip-body #hud-text {
+  display: none;
+}
+
+.pip-body .pip-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--panel);
+  color: var(--text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
