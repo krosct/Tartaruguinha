@@ -561,7 +561,8 @@ button:disabled {
   display: none !important;
 }
 
-.pip-footer {
+.pip-footer,
+.pip-badge {
   display: none;
 }
 
@@ -583,8 +584,46 @@ button:disabled {
   border-radius: 0;
 }
 
+.pip-body #preview,
+.pip-body .pose-overlay {
+  transform: none;
+}
+
 .pip-body .hud {
   padding: 6px;
+}
+
+.pip-body .pip-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid #334155;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.pip-badge span {
+  display: inline-block;
+  animation: turtle-spin 30s linear infinite;
+}
+
+@keyframes turtle-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pip-badge span {
+    animation: none;
+  }
 }
 
 .pip-body #hud-text {
