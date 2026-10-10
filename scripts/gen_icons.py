@@ -1,4 +1,4 @@
-"""Generate PWA icons (192, 512, maskable 512) with Pillow.
+"""Generate PWA icons (192, 512, maskable 512) and the 🐢 favicon with Pillow.
 
 Run with the project venv: `~/.venv/bin/python scripts/gen_icons.py`.
 """
@@ -7,9 +7,11 @@ from __future__ import annotations
 
 import os
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
-OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public", "icons")
+PUBLIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public")
+OUT_DIR = os.path.join(PUBLIC_DIR, "icons")
+EMOJI_FONT = "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf"
 
 BACKGROUND = (15, 118, 110)
 SHELL = (45, 212, 191)
@@ -66,10 +68,23 @@ def generate(size: int, filename: str, maskable: bool) -> None:
     canvas.save(os.path.join(OUT_DIR, filename))
 
 
+def generate_favicon(size: int = 64) -> None:
+    # Noto Color Emoji only ships bitmaps at 109px; render there, then scale.
+    font = ImageFont.truetype(EMOJI_FONT, 109)
+    glyph = Image.new("RGBA", (160, 160), (0, 0, 0, 0))
+    ImageDraw.Draw(glyph).text((10, 10), "🐢", font=font, embedded_color=True)
+    glyph = glyph.crop(glyph.getbbox())
+    side = max(glyph.size)
+    square = Image.new("RGBA", (side, side), (0, 0, 0, 0))
+    square.paste(glyph, ((side - glyph.width) // 2, (side - glyph.height) // 2))
+    square.resize((size, size), Image.LANCZOS).save(os.path.join(PUBLIC_DIR, "favicon.png"))
+
+
 def main() -> None:
     generate(192, "icon-192.png", maskable=False)
     generate(512, "icon-512.png", maskable=False)
     generate(512, "icon-maskable-512.png", maskable=True)
+    generate_favicon()
     print(f"Icons written to {os.path.normpath(OUT_DIR)}")
 
 
