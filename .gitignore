@@ -1,0 +1,21 @@
+node_modules/
+dist/
+dev-dist/
+__pycache__/
+*.pyc
+.env
+.env.local
+*.log
+.vite/
+
+# Local-only docs (never committed)
+AGENTS.md
+Tartaruguinha.md
+howto.txt
+
+# Full-size source images (README uses the compressed copies in img/)
+img/originais/
+
+# Re-downloaded by `npm run setup` / `npm run fetch:pose`
+public/models/
+public/mediapipe/

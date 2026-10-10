@@ -1,0 +1,61 @@
+---
+title: "Tartaruguinha - da webcam ao alerta (tudo no seu aparelho)"
+---
+flowchart TB
+    classDef actor fill:#FDE68A,stroke:#B45309,stroke-width:2px,color:#1c1917
+    classDef client fill:#DBEAFE,stroke:#2563EB,stroke-width:2px,color:#0b1f44
+    classDef model fill:#DCFCE7,stroke:#16A34A,stroke-width:2px,color:#052e16
+    classDef config fill:#F1F5F9,stroke:#64748B,stroke-width:2px,color:#0f172a
+    classDef rule fill:#EDE9FE,stroke:#7C3AED,stroke-width:2px,color:#2e1065
+    classDef gate fill:#FFF7ED,stroke:#EA580C,stroke-width:2px,color:#431407
+    classDef alert fill:#FEE2E2,stroke:#DC2626,stroke-width:2px,color:#450a0a
+
+    U["USUÁRIO<br/>trabalha na frente da webcam"]:::actor
+    U --> A1
+
+    A1["Etapa 1 . index.html + main.ts<br/>consentimento LGPD e botão Iniciar<br/>o clique também libera o som do alerta"]:::client
+    A1 --> A2
+    A2["Etapa 1 . camera.ts<br/>getUserMedia (webcam)<br/>vídeo 100% local, nenhuma imagem sai do aparelho"]:::client
+    A2 --> A3
+    A3["Etapa 1 . session.ts<br/>Wake Lock mantém a tela ligada<br/>aba oculta = monitoramento pausado"]:::client
+    A3 --> B1
+
+    S["settings.ts + settingsPanel.ts<br/>padrões do .env, ajustáveis no painel Configurações<br/>(salvos neste navegador)"]:::config
+
+    B1["Etapa 2 . pose.ts<br/>MediaPipe Pose Landmarker no navegador (WASM/GPU)<br/>modelo lite / full / heavy, ~10 quadros por segundo"]:::model
+    B1 --> B2
+    B2["Etapa 2 . pose.ts<br/>33 pontos do corpo + visibilidade<br/>confiança = média de nariz e ombros"]:::model
+    B2 --> F1
+
+    F1["Etapa 3 . posture.ts<br/>regra geométrica determinística<br/>razão = altura do pescoço / largura dos ombros"]:::rule
+    F1 --> G1
+    G1{"confiança >= limite?"}:::gate
+    G1 -->|"não"| R1["incerto (amarelo)"]:::rule
+    G1 -->|"sim"| G2{"nariz e ombros<br/>visíveis?"}:::gate
+    G2 -->|"não"| R2["tronco não visível (cinza)"]:::rule
+    G2 -->|"sim"| G3{"razão >= 0.6?"}:::gate
+    G3 -->|"sim"| R3["reto (verde)"]:::rule
+    G3 -->|"não"| R4["curvado (vermelho)"]:::rule
+
+    R1 --> H1
+    R2 --> H1
+    R3 --> H1
+    R4 --> H1
+    H1["Etapa 4 . overlay.ts + ui.ts<br/>esqueleto e moldura na cor do estado (na hora)"]:::client
+    H1 --> H2
+    H2["Etapa 4 . posture.ts (estabilizador)<br/>a cada 500 ms; só troca o estado mostrado<br/>após 2 leituras iguais seguidas"]:::rule
+    H2 --> I1
+
+    I1{"Etapa 5 . curvado e<br/>intervalo entre alertas vencido?"}:::alert
+    I1 -->|"sim"| I2["Etapa 5 . alerta<br/>toque ding-dong + brilho na tela<br/>+ notificação do sistema"]:::alert
+    I1 -->|"não"| I3["sem alerta<br/>(evita repetição chata)"]:::alert
+    I2 --> J
+    I3 --> J
+
+    J["FEEDBACK ao usuário<br/>vê a cor, ouve o aviso e corrige a postura"]:::actor
+    J -.->|"próximo quadro (~100 ms)"| B1
+
+    S -.-> B1
+    S -.-> F1
+    S -.-> H2
+    S -.-> I1

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f766e" />
+    <meta
+      name="description"
+      content="Sua webcam observa a postura e avisa, na hora, quando você se curva."
+    />
+    <title>Tartaruguinha</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <main id="app">
+      <header class="head">
+        <h1>Tartaruguinha</h1>
+        <p class="tagline">
+          Sua postura agradece. Seu pescoço também.
+        </p>
+      </header>
+
+      <section id="consent" class="card">
+        <h2>Antes de começar</h2>
+        <ul class="consent-list">
+          <li>A análise de postura roda inteiramente no seu aparelho, em tempo real.</li>
+          <li>Nenhuma imagem ou vídeo sai do aparelho, nem é gravado.</li>
+          <li>Um indicador mostra sempre quando o monitoramento está ligado.</li>
+          <li>O botão <b>Parar</b> encerra tudo na hora.</li>
+        </ul>
+        <label class="check">
+          <input type="checkbox" id="consent-check" />
+          <span
+            >Entendi e autorizo o uso da câmera para analisar minha postura.</span
+          >
+        </label>
+        <button id="consent-accept" class="primary" disabled>Começar</button>
+      </section>
+
+      <section id="monitor" class="hidden">
+        <div id="stage" class="stage">
+          <video id="preview" playsinline muted></video>
+          <canvas id="pose-overlay" class="pose-overlay"></canvas>
+          <div id="guide" class="guide" data-result="unknown" aria-hidden="true"></div>
+          <div id="hud" class="hud" data-result="unknown" data-monitoring="off">
+            <span class="hud-dot"></span>
+            <span id="hud-text">Monitoramento desligado</span>
+          </div>
+        </div>
+
+        <p id="status" class="status" data-result="unknown">Pronto para começar</p>
+        <p id="status-detail" class="status-detail"></p>
+        <p id="reason" class="reason" data-visible="false"></p>
+
+        <div class="controls">
+          <button id="toggle" class="primary" data-monitoring="false">Iniciar</button>
+        </div>
+
+        <div class="session">
+          <span>Sessão: <b id="session-time">00:00</b></span>
+          <span>Alertas: <b id="alert-count">0</b></span>
+        </div>
+
+        <p id="hint" class="hint"></p>
+
+        <details class="card settings">
+          <summary>Configurações</summary>
+          <p class="settings-note">
+            Os valores padrão vêm do arquivo <code>.env</code>. O que você mudar aqui fica salvo
+            neste navegador e vale na hora.
+          </p>
+          <form id="settings-form" class="settings-form"></form>
+          <div class="settings-actions">
+            <button type="button" id="test-sound" class="secondary">Testar som do alerta</button>
+            <button type="button" id="settings-reset" class="secondary">
+              Restaurar padrões do .env
+            </button>
+          </div>
+        </details>
+      </section>
+
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
