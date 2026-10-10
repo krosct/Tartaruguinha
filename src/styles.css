@@ -48,11 +48,14 @@ body {
   padding: 24px 16px 48px;
 }
 
+.head {
+  padding: 0 8px;
+}
+
 .brand {
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-left: -16px;
 }
 
 .avatar {
@@ -455,7 +458,7 @@ button:disabled {
 }
 
 @media (max-width: 420px) {
-  .setting {
+  .setting:not(.setting-check) {
     grid-template-columns: 1fr;
   }
 }
