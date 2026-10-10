@@ -607,11 +607,8 @@ button:disabled {
 /* The emoji glyph sits slightly low in its box; lift it and spin around its center. */
 .pip-badge span {
   display: block;
-  width: 1em;
-  height: 1em;
-  margin-top: -0.04em;
-  text-align: center;
-  transform-origin: 50% calc(50% + 0.04em);
+  margin-top: -0.09em;
+  transform-origin: 50% calc(50% + 0.09em);
   filter: drop-shadow(0 0 4px rgba(230, 236, 245, 0.8));
   animation: turtle-spin 30s linear infinite;
 }
