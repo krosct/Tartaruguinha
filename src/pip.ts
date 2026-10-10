@@ -22,13 +22,13 @@ function copyStyles(target: Document): void {
   }
 }
 
-// Moves the stage into an always-on-top Document Picture-in-Picture window.
+// Moves elements into an always-on-top Document Picture-in-Picture window.
 export class FloatingStage {
   private pipWindow: Window | null = null;
-  private placeholder: Comment | null = null;
+  private placeholders: Comment[] = [];
 
   constructor(
-    private readonly stage: HTMLElement,
+    private readonly elements: HTMLElement[],
     private readonly video: HTMLVideoElement,
     private readonly onClosed: () => void,
   ) {}
@@ -48,7 +48,7 @@ export class FloatingStage {
     }
     let pip: Window;
     try {
-      pip = await api.requestWindow({ width: 360, height: 270 });
+      pip = await api.requestWindow({ width: 360, height: 310 });
     } catch {
       return false;
     }
@@ -56,9 +56,12 @@ export class FloatingStage {
     copyStyles(pip.document);
     pip.document.title = "Tartaruguinha";
     pip.document.body.classList.add("pip-body");
-    this.placeholder = document.createComment("stage");
-    this.stage.replaceWith(this.placeholder);
-    pip.document.body.append(this.stage);
+    this.placeholders = this.elements.map((element) => {
+      const placeholder = document.createComment("pip");
+      element.replaceWith(placeholder);
+      pip.document.body.append(element);
+      return placeholder;
+    });
     void this.video.play().catch(() => undefined);
     pip.addEventListener("pagehide", () => this.restore(), { once: true });
     return true;
@@ -74,8 +77,10 @@ export class FloatingStage {
       return;
     }
     this.pipWindow = null;
-    this.placeholder?.replaceWith(this.stage);
-    this.placeholder = null;
+    this.placeholders.forEach((placeholder, index) =>
+      placeholder.replaceWith(this.elements[index]),
+    );
+    this.placeholders = [];
     void this.video.play().catch(() => undefined);
     this.onClosed();
   }

@@ -48,6 +48,11 @@
           </div>
         </div>
 
+        <div id="pip-footer" class="pip-footer" aria-hidden="true">
+          <span id="pip-time">00:00</span>
+          <span id="pip-alerts">0 alertas</span>
+        </div>
+
         <p id="status" class="status" data-result="unknown">Pronto para começar</p>
         <p id="status-detail" class="status-detail"></p>
         <p id="reason" class="reason" data-visible="false"></p>
@@ -65,6 +70,18 @@
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
               <path d="M21 3v5h-5" />
+            </svg>
+          </button>
+          <button
+            id="pip-open"
+            class="secondary icon-button hidden"
+            type="button"
+            aria-label="Abrir janela flutuante"
+            title="Abrir janela flutuante"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 9V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4" />
+              <rect x="12" y="13" width="10" height="7" rx="2" />
             </svg>
           </button>
           <button

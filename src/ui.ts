@@ -42,6 +42,10 @@ export interface UiElements {
   toggle: HTMLButtonElement;
   restart: HTMLButtonElement;
   historyOpen: HTMLButtonElement;
+  pipOpen: HTMLButtonElement;
+  pipFooter: HTMLElement;
+  pipTime: HTMLElement;
+  pipAlerts: HTMLElement;
   historyDialog: HTMLDialogElement;
   historyClose: HTMLButtonElement;
   historyList: HTMLElement;
@@ -79,6 +83,10 @@ export function queryElements(): UiElements {
     toggle: requireElement<HTMLButtonElement>("toggle"),
     restart: requireElement<HTMLButtonElement>("restart"),
     historyOpen: requireElement<HTMLButtonElement>("history-open"),
+    pipOpen: requireElement<HTMLButtonElement>("pip-open"),
+    pipFooter: requireElement("pip-footer"),
+    pipTime: requireElement("pip-time"),
+    pipAlerts: requireElement("pip-alerts"),
     historyDialog: requireElement<HTMLDialogElement>("history-dialog"),
     historyClose: requireElement<HTMLButtonElement>("history-close"),
     historyList: requireElement("history-list"),
@@ -150,10 +158,12 @@ export function setHint(el: UiElements, text: string): void {
 
 export function setSessionTime(el: UiElements, elapsedMs: number): void {
   el.sessionTime.textContent = formatDuration(elapsedMs);
+  el.pipTime.textContent = el.sessionTime.textContent;
 }
 
 export function setAlertCount(el: UiElements, count: number): void {
   el.alertCount.textContent = String(count);
+  el.pipAlerts.textContent = `${count} ${count === 1 ? "alerta" : "alertas"}`;
 }
 
 export function formatDuration(ms: number): string {

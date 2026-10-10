@@ -44,7 +44,8 @@ let session: MonitorSession | null = null;
 let poseDetector: PoseDetector | null = null;
 let detectorGeneration = 0;
 const ticker = new Ticker(detectOnce);
-const floating = new FloatingStage(el.stage, el.video, () => {
+const floating = new FloatingStage([el.stage, el.pipFooter], el.video, () => {
+  updatePipButton();
   if (session) {
     ui.setHint(el, "Janela flutuante fechada. A análise continua com a aba oculta.");
   }
@@ -82,18 +83,15 @@ function init(): void {
       pauseMonitoring();
     } else {
       void startMonitoring();
-      openFloating();
     }
   });
 
   el.restart.addEventListener("click", () => {
     ui.unlockAudio();
-    const wasRunning = session !== null;
     restartSession();
-    if (!wasRunning) {
-      openFloating();
-    }
   });
+
+  el.pipOpen.addEventListener("click", openFloating);
 
   el.historyOpen.addEventListener("click", () => {
     persistSession();
@@ -149,14 +147,22 @@ function applySettings(next: Settings, changed: SettingKey[]): void {
     } else if (settings.backgroundMode !== "pip") {
       floating.close();
     }
+    updatePipButton();
   }
+}
+
+function updatePipButton(): void {
+  const available =
+    settings.backgroundMode === "pip" && pipSupported() && session !== null && !floating.isOpen;
+  el.pipOpen.classList.toggle("hidden", !available);
 }
 
 function runsHidden(): boolean {
   return settings.backgroundMode !== "off";
 }
 
-// Document Picture-in-Picture needs a user gesture, so call this from a click.
+// Document Picture-in-Picture needs recent user activation; it fails if the
+// camera prompt took too long, and the pip button lets the user retry.
 function openFloating(): void {
   if (settings.backgroundMode !== "pip") {
     return;
@@ -169,8 +175,9 @@ function openFloating(): void {
     return;
   }
   void floating.open().then((opened) => {
+    updatePipButton();
     if (!opened && session) {
-      ui.setHint(el, "Não foi possível abrir a janela flutuante. A análise continua com a aba oculta.");
+      ui.setHint(el, "Clique no botão de janela flutuante para abri-la.");
     }
   });
 }
@@ -222,6 +229,8 @@ async function startMonitoring(): Promise<void> {
       ui.setHudIdle(el, "Verificando…");
     },
   });
+  updatePipButton();
+  openFloating();
   await session.start();
   hiddenPaused = document.hidden && !runsHidden();
   activeSince = hiddenPaused ? null : Date.now();
@@ -306,6 +315,7 @@ function pauseMonitoring(): void {
   session = null;
   hiddenPaused = false;
   floating.close();
+  updatePipButton();
   ui.setBackgroundTitle(false);
   stopTimer();
   stopLiveDetection();

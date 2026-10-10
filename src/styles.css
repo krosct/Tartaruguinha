@@ -561,16 +561,42 @@ button:disabled {
   display: none !important;
 }
 
+.pip-footer {
+  display: none;
+}
+
 .pip-body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
   margin: 0;
   overflow: hidden;
   background: #05080f;
 }
 
 .pip-body .stage {
-  width: 100vw;
-  height: 100vh;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
   aspect-ratio: auto;
   border: 0;
   border-radius: 0;
+}
+
+.pip-body .hud {
+  padding: 6px;
+}
+
+.pip-body #hud-text {
+  display: none;
+}
+
+.pip-body .pip-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--panel);
+  color: var(--text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
