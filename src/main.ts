@@ -1,5 +1,7 @@
 import { CameraError, startCamera, stopCamera } from "./camera";
 import { clearOverlay, drawSkeleton, resizeOverlay } from "./overlay";
+import { loadHistory, newSessionId, saveRecord, SessionRecord } from "./history";
+import { renderHistory } from "./historyPanel";
 import { PoseDetector, PoseFrame } from "./pose";
 import {
   canAlert,
@@ -43,8 +45,9 @@ let rafId: number | null = null;
 let lastDetectAt = 0;
 let lastVerdictAt = 0;
 let lastVideoTime = -1;
-let sessionStartedAt = 0;
-let alertCount = 0;
+let current: SessionRecord | null = null;
+let activeSince: number | null = null;
+let lastTallyAt: number | null = null;
 let lastAlertAt: number | null = null;
 let lastNotificationAt: number | null = null;
 let timerId: number | null = null;
@@ -69,11 +72,31 @@ function init(): void {
   el.toggle.addEventListener("click", () => {
     ui.unlockAudio();
     if (session) {
-      stopMonitoring();
+      pauseMonitoring();
     } else {
       void startMonitoring();
     }
   });
+
+  el.restart.addEventListener("click", () => {
+    ui.unlockAudio();
+    restartSession();
+  });
+
+  el.historyOpen.addEventListener("click", () => {
+    persistSession();
+    renderHistory(el.historyList, loadHistory(), current?.id ?? null);
+    el.historyDialog.showModal();
+  });
+
+  el.historyClose.addEventListener("click", () => el.historyDialog.close());
+  el.historyDialog.addEventListener("click", (event) => {
+    if (event.target === el.historyDialog) {
+      el.historyDialog.close();
+    }
+  });
+
+  window.addEventListener("pagehide", persistSession);
 
   el.testSound.addEventListener("click", () => {
     ui.unlockAudio();
@@ -120,13 +143,12 @@ async function startMonitoring(): Promise<void> {
     return;
   }
 
-  sessionStartedAt = Date.now();
-  alertCount = 0;
-  lastAlertAt = null;
-  lastNotificationAt = null;
+  if (!current) {
+    beginSession();
+  }
   stabilizer = createStabilizer(PostureResult.Unknown);
-  ui.setAlertCount(el, alertCount);
-  ui.setToggle(el, true);
+  lastTallyAt = null;
+  ui.setToggle(el, "running", true);
   ui.setMonitoringState(el, "on");
   ui.setGuide(el, PostureResult.Unknown);
   ui.setHudIdle(el, "Verificando…");
@@ -135,34 +157,109 @@ async function startMonitoring(): Promise<void> {
 
   session = new MonitorSession({
     onPause: () => {
+      closeActiveSpan();
+      persistSession();
       ui.setMonitoringState(el, "paused");
       ui.setHudIdle(el, "Pausado (aba oculta)");
     },
     onResume: () => {
+      activeSince = Date.now();
       ui.setMonitoringState(el, "on");
       ui.setHudIdle(el, "Verificando…");
     },
   });
   await session.start();
+  activeSince = document.hidden ? null : Date.now();
   startTimer();
   void startLiveDetection();
 }
 
-function stopMonitoring(): void {
+function beginSession(): void {
+  current = {
+    id: newSessionId(),
+    startedAt: Date.now(),
+    activeMs: 0,
+    alerts: 0,
+    goodMs: 0,
+    hunchedMs: 0,
+  };
+  activeSince = session && !document.hidden ? Date.now() : null;
+  lastTallyAt = null;
+  lastAlertAt = null;
+  lastNotificationAt = null;
+  stabilizer = createStabilizer(PostureResult.Unknown);
+  ui.setAlertCount(el, 0);
+  ui.setSessionTime(el, 0);
+}
+
+function restartSession(): void {
+  closeActiveSpan();
+  persistSession();
+  current = null;
+  if (session) {
+    beginSession();
+    ui.setHudIdle(el, "Verificando…");
+    ui.setStatus(el, PostureResult.Unknown, "Nova sessão iniciada.");
+  } else {
+    void startMonitoring();
+  }
+}
+
+function elapsedMs(): number {
+  if (!current) {
+    return 0;
+  }
+  return current.activeMs + (activeSince !== null ? Date.now() - activeSince : 0);
+}
+
+function closeActiveSpan(): void {
+  if (current && activeSince !== null) {
+    current.activeMs += Date.now() - activeSince;
+  }
+  activeSince = null;
+  lastTallyAt = null;
+}
+
+function persistSession(): void {
+  if (!current) {
+    return;
+  }
+  const activeMs = elapsedMs();
+  if (activeMs < 1000 && current.alerts === 0) {
+    return;
+  }
+  saveRecord({ ...current, activeMs });
+}
+
+function tally(displayed: PostureResult, now: number): void {
+  if (current && lastTallyAt !== null) {
+    const delta = now - lastTallyAt;
+    if (displayed === PostureResult.Good) {
+      current.goodMs += delta;
+    } else if (displayed === PostureResult.Hunched) {
+      current.hunchedMs += delta;
+    }
+  }
+  lastTallyAt = now;
+}
+
+function pauseMonitoring(): void {
+  closeActiveSpan();
+  persistSession();
   session?.stop();
   session = null;
   stopTimer();
   stopLiveDetection();
   ui.setReason(el, "");
-  ui.setHudIdle(el, "Monitoramento desligado");
+  ui.setHudIdle(el, "Monitoramento pausado");
   ui.setGuide(el, PostureResult.Unknown);
   stopCamera(el.video, stream);
   stream = null;
   previewing = false;
-  ui.setToggle(el, false);
-  ui.setMonitoringState(el, "off");
-  ui.setStatus(el, PostureResult.Unknown, "Monitoramento parado.");
-  ui.setHint(el, "Clique em Iniciar para retomar.");
+  ui.setToggle(el, current ? "paused" : "idle", current !== null);
+  ui.setMonitoringState(el, current ? "paused" : "off");
+  ui.setStatus(el, PostureResult.Unknown, "Monitoramento pausado.");
+  ui.setHint(el, "Retomar continua esta sessão. O botão de reiniciar começa uma nova.");
 }
 
 async function startLiveDetection(): Promise<void> {
@@ -185,7 +282,7 @@ async function startLiveDetection(): Promise<void> {
     if (generation !== detectorGeneration) {
       return;
     }
-    stopMonitoring();
+    pauseMonitoring();
     ui.setStatus(
       el,
       PostureResult.Unknown,
@@ -203,6 +300,7 @@ function stopLiveDetection(): void {
   stopLiveLoop();
   poseDetector?.close();
   poseDetector = null;
+  lastTallyAt = null;
   clearOverlay(el.overlay);
 }
 
@@ -261,6 +359,7 @@ function handleLiveFrame(frame: PoseFrame | null, now: number): void {
 
   stabilizer = stabilize(stabilizer, instant, settings.stateSmoothing);
   const displayed = stabilizer.displayed;
+  tally(displayed, now);
   ui.setGuide(el, instant);
   ui.setHud(el, displayed, confidence);
   ui.setStatus(el, displayed, ui.STATUS_DETAIL[displayed]);
@@ -295,8 +394,11 @@ function maybeAlert(displayed: PostureResult): void {
   const now = Date.now();
   if (canAlert(lastAlertAt, now, settings.alertCooldownMs)) {
     lastAlertAt = now;
-    alertCount += 1;
-    ui.setAlertCount(el, alertCount);
+    if (current) {
+      current.alerts += 1;
+      ui.setAlertCount(el, current.alerts);
+      persistSession();
+    }
     if (settings.alertSound === "on") {
       ui.playAlertTone(settings.alertVolume);
     }
@@ -310,6 +412,7 @@ function maybeAlert(displayed: PostureResult): void {
 
 function handleCameraFailure(error: unknown): void {
   const reason = error instanceof CameraError ? error.reason : "failed";
+  ui.setToggle(el, current ? "paused" : "idle", current !== null);
   if (reason === "denied" || reason === "unsupported") {
     previewing = false;
     ui.setMonitoringState(el, "off");
@@ -322,7 +425,10 @@ function handleCameraFailure(error: unknown): void {
 
 function startTimer(): void {
   stopTimer();
-  const update = () => ui.setSessionTime(el, Date.now() - sessionStartedAt);
+  const update = () => {
+    ui.setSessionTime(el, elapsedMs());
+    persistSession();
+  };
   update();
   timerId = window.setInterval(update, 1000);
 }

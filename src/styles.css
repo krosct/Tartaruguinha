@@ -118,9 +118,28 @@ button:disabled {
   font-size: 1.05rem;
 }
 
-.primary[data-monitoring="true"] {
+.primary[data-state="running"] {
   background: var(--danger);
   color: #2a0707;
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  padding: 0;
+}
+
+.icon-button svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .secondary {
@@ -419,6 +438,123 @@ button:disabled {
   .setting {
     grid-template-columns: 1fr;
   }
+}
+
+.history-dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  padding: 20px;
+  border: 1px solid #24314d;
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.history-dialog::backdrop {
+  background: rgba(5, 8, 15, 0.7);
+}
+
+.history-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.history-top h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.history-top .icon-button {
+  width: 40px;
+  height: 40px;
+}
+
+.history-note,
+.history-empty {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.history-item {
+  background: var(--panel-2);
+  border: 1px solid #2c3b5c;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.history-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  margin-bottom: 10px;
+}
+
+.history-when {
+  font-weight: 700;
+}
+
+.history-current {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--accent-strong);
+  font-size: 0.72rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.trend {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.trend[data-trend="better"] {
+  color: var(--good);
+}
+
+.trend[data-trend="worse"] {
+  color: var(--hunched);
+}
+
+.trend[data-trend="neutral"] {
+  color: var(--muted);
+}
+
+.history-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 8px;
+}
+
+.history-stat {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.history-stat b {
+  color: var(--text);
+  font-size: 0.98rem;
+}
+
+.history-stat[data-tone="good"] b {
+  color: var(--good);
+}
+
+.history-stat[data-tone="hunched"] b {
+  color: var(--hunched);
 }
 
 .hidden {

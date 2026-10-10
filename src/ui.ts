@@ -23,6 +23,14 @@ export const HUD_TEXT: Record<PostureResult, string> = {
 
 export type MonitoringState = "on" | "off" | "paused";
 
+export type ToggleState = "idle" | "running" | "paused";
+
+const TOGGLE_TEXT: Record<ToggleState, string> = {
+  idle: "Iniciar",
+  running: "Pausar",
+  paused: "Retomar",
+};
+
 export interface UiElements {
   consent: HTMLElement;
   consentCheck: HTMLInputElement;
@@ -32,6 +40,11 @@ export interface UiElements {
   status: HTMLElement;
   statusDetail: HTMLElement;
   toggle: HTMLButtonElement;
+  restart: HTMLButtonElement;
+  historyOpen: HTMLButtonElement;
+  historyDialog: HTMLDialogElement;
+  historyClose: HTMLButtonElement;
+  historyList: HTMLElement;
   sessionTime: HTMLElement;
   alertCount: HTMLElement;
   hint: HTMLElement;
@@ -64,6 +77,11 @@ export function queryElements(): UiElements {
     status: requireElement("status"),
     statusDetail: requireElement("status-detail"),
     toggle: requireElement<HTMLButtonElement>("toggle"),
+    restart: requireElement<HTMLButtonElement>("restart"),
+    historyOpen: requireElement<HTMLButtonElement>("history-open"),
+    historyDialog: requireElement<HTMLDialogElement>("history-dialog"),
+    historyClose: requireElement<HTMLButtonElement>("history-close"),
+    historyList: requireElement("history-list"),
     sessionTime: requireElement("session-time"),
     alertCount: requireElement("alert-count"),
     hint: requireElement("hint"),
@@ -113,9 +131,10 @@ export function setMonitoringState(el: UiElements, state: MonitoringState): void
   el.hud.dataset.monitoring = state;
 }
 
-export function setToggle(el: UiElements, monitoring: boolean): void {
-  el.toggle.textContent = monitoring ? "Parar" : "Iniciar";
-  el.toggle.dataset.monitoring = String(monitoring);
+export function setToggle(el: UiElements, state: ToggleState, hasSession: boolean): void {
+  el.toggle.textContent = TOGGLE_TEXT[state];
+  el.toggle.dataset.state = state;
+  el.restart.disabled = !hasSession;
 }
 
 export function setHint(el: UiElements, text: string): void {
