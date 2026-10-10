@@ -93,6 +93,11 @@ function init(): void {
 
   el.pipOpen.addEventListener("click", openFloating);
 
+  // The preview is mirrored with CSS, which would also mirror native video
+  // controls; block the context menu that turns them on.
+  el.stage.addEventListener("contextmenu", (event) => event.preventDefault());
+  el.video.disablePictureInPicture = true;
+
   el.historyOpen.addEventListener("click", () => {
     persistSession();
     renderHistory(el.historyList, loadHistory(), current?.id ?? null);
