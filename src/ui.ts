@@ -137,6 +137,13 @@ export function setToggle(el: UiElements, state: ToggleState, hasSession: boolea
   el.restart.disabled = !hasSession;
 }
 
+const APP_TITLE = "Tartaruguinha";
+const BACKGROUND_TITLE = "🟢 Tartaruguinha está de olho!";
+
+export function setBackgroundTitle(active: boolean): void {
+  document.title = active ? BACKGROUND_TITLE : APP_TITLE;
+}
+
 export function setHint(el: UiElements, text: string): void {
   el.hint.textContent = text;
 }

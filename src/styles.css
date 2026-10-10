@@ -560,3 +560,17 @@ button:disabled {
 .hidden {
   display: none !important;
 }
+
+.pip-body {
+  margin: 0;
+  overflow: hidden;
+  background: #05080f;
+}
+
+.pip-body .stage {
+  width: 100vw;
+  height: 100vh;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+}

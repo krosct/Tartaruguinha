@@ -2,6 +2,7 @@ import { CameraError, startCamera, stopCamera } from "./camera";
 import { clearOverlay, drawSkeleton, resizeOverlay } from "./overlay";
 import { loadHistory, newSessionId, saveRecord, SessionRecord } from "./history";
 import { renderHistory } from "./historyPanel";
+import { FloatingStage, pipSupported } from "./pip";
 import { PoseDetector, PoseFrame } from "./pose";
 import {
   canAlert,
@@ -23,6 +24,7 @@ import {
   Settings,
 } from "./settings";
 import { mountSettingsPanel } from "./settingsPanel";
+import { Ticker } from "./ticker";
 import { PostureResult } from "./types";
 import * as ui from "./ui";
 
@@ -41,8 +43,13 @@ let stream: MediaStream | null = null;
 let session: MonitorSession | null = null;
 let poseDetector: PoseDetector | null = null;
 let detectorGeneration = 0;
-let rafId: number | null = null;
-let lastDetectAt = 0;
+const ticker = new Ticker(detectOnce);
+const floating = new FloatingStage(el.stage, el.video, () => {
+  if (session) {
+    ui.setHint(el, "Janela flutuante fechada. A análise continua com a aba oculta.");
+  }
+});
+let hiddenPaused = false;
 let lastVerdictAt = 0;
 let lastVideoTime = -1;
 let current: SessionRecord | null = null;
@@ -75,12 +82,17 @@ function init(): void {
       pauseMonitoring();
     } else {
       void startMonitoring();
+      openFloating();
     }
   });
 
   el.restart.addEventListener("click", () => {
     ui.unlockAudio();
+    const wasRunning = session !== null;
     restartSession();
+    if (!wasRunning) {
+      openFloating();
+    }
   });
 
   el.historyOpen.addEventListener("click", () => {
@@ -128,7 +140,39 @@ function applySettings(next: Settings, changed: SettingKey[]): void {
     stopLiveDetection();
     ui.setHudIdle(el, "Recarregando o detector…");
     void startLiveDetection();
+  } else if (poseDetector && changed.includes("detectIntervalMs")) {
+    ticker.start(settings.detectIntervalMs);
   }
+  if (changed.includes("backgroundMode")) {
+    if (settings.backgroundMode === "pip" && session) {
+      openFloating();
+    } else if (settings.backgroundMode !== "pip") {
+      floating.close();
+    }
+  }
+}
+
+function runsHidden(): boolean {
+  return settings.backgroundMode !== "off";
+}
+
+// Document Picture-in-Picture needs a user gesture, so call this from a click.
+function openFloating(): void {
+  if (settings.backgroundMode !== "pip") {
+    return;
+  }
+  if (!pipSupported()) {
+    ui.setHint(
+      el,
+      "Este navegador não tem janela flutuante. A análise continua com a aba oculta.",
+    );
+    return;
+  }
+  void floating.open().then((opened) => {
+    if (!opened && session) {
+      ui.setHint(el, "Não foi possível abrir a janela flutuante. A análise continua com a aba oculta.");
+    }
+  });
 }
 
 async function startMonitoring(): Promise<void> {
@@ -157,19 +201,31 @@ async function startMonitoring(): Promise<void> {
 
   session = new MonitorSession({
     onPause: () => {
-      closeActiveSpan();
       persistSession();
+      if (runsHidden()) {
+        ui.setBackgroundTitle(true);
+        return;
+      }
+      hiddenPaused = true;
+      closeActiveSpan();
       ui.setMonitoringState(el, "paused");
       ui.setHudIdle(el, "Pausado (aba oculta)");
     },
     onResume: () => {
+      ui.setBackgroundTitle(false);
+      if (!hiddenPaused) {
+        return;
+      }
+      hiddenPaused = false;
       activeSince = Date.now();
       ui.setMonitoringState(el, "on");
       ui.setHudIdle(el, "Verificando…");
     },
   });
   await session.start();
-  activeSince = document.hidden ? null : Date.now();
+  hiddenPaused = document.hidden && !runsHidden();
+  activeSince = hiddenPaused ? null : Date.now();
+  ui.setBackgroundTitle(document.hidden && !hiddenPaused);
   startTimer();
   void startLiveDetection();
 }
@@ -183,7 +239,7 @@ function beginSession(): void {
     goodMs: 0,
     hunchedMs: 0,
   };
-  activeSince = session && !document.hidden ? Date.now() : null;
+  activeSince = session && !hiddenPaused ? Date.now() : null;
   lastTallyAt = null;
   lastAlertAt = null;
   lastNotificationAt = null;
@@ -248,6 +304,9 @@ function pauseMonitoring(): void {
   persistSession();
   session?.stop();
   session = null;
+  hiddenPaused = false;
+  floating.close();
+  ui.setBackgroundTitle(false);
   stopTimer();
   stopLiveDetection();
   ui.setReason(el, "");
@@ -277,7 +336,7 @@ async function startLiveDetection(): Promise<void> {
       return;
     }
     poseDetector = detector;
-    startLiveLoop();
+    ticker.start(settings.detectIntervalMs);
   } catch {
     if (generation !== detectorGeneration) {
       return;
@@ -297,48 +356,32 @@ async function startLiveDetection(): Promise<void> {
 
 function stopLiveDetection(): void {
   detectorGeneration += 1;
-  stopLiveLoop();
+  ticker.stop();
   poseDetector?.close();
   poseDetector = null;
   lastTallyAt = null;
   clearOverlay(el.overlay);
 }
 
-function startLiveLoop(): void {
-  stopLiveLoop();
-  const loop = () => {
-    rafId = requestAnimationFrame(loop);
-    if (!poseDetector || document.hidden) {
-      return;
-    }
-    const now = performance.now();
-    if (now - lastDetectAt < settings.detectIntervalMs) {
-      return;
-    }
-    const video = el.video;
-    if (!video.videoWidth || video.currentTime === lastVideoTime) {
-      return;
-    }
-    lastDetectAt = now;
-    lastVideoTime = video.currentTime;
-
-    resizeOverlay(el.overlay, video);
-    let frame: PoseFrame | null;
-    try {
-      frame = poseDetector.detect(video, now);
-    } catch {
-      frame = null;
-    }
-    handleLiveFrame(frame, now);
-  };
-  rafId = requestAnimationFrame(loop);
-}
-
-function stopLiveLoop(): void {
-  if (rafId !== null) {
-    cancelAnimationFrame(rafId);
-    rafId = null;
+function detectOnce(): void {
+  if (!poseDetector || (document.hidden && !runsHidden())) {
+    return;
   }
+  const video = el.video;
+  if (!video.videoWidth || video.currentTime === lastVideoTime) {
+    return;
+  }
+  lastVideoTime = video.currentTime;
+
+  const now = performance.now();
+  resizeOverlay(el.overlay, video);
+  let frame: PoseFrame | null;
+  try {
+    frame = poseDetector.detect(video, now);
+  } catch {
+    frame = null;
+  }
+  handleLiveFrame(frame, now);
 }
 
 function handleLiveFrame(frame: PoseFrame | null, now: number): void {
@@ -412,6 +455,7 @@ function maybeAlert(displayed: PostureResult): void {
 
 function handleCameraFailure(error: unknown): void {
   const reason = error instanceof CameraError ? error.reason : "failed";
+  floating.close();
   ui.setToggle(el, current ? "paused" : "idle", current !== null);
   if (reason === "denied" || reason === "unsupported") {
     previewing = false;
